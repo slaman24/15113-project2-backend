@@ -2,6 +2,7 @@ import os
 import json
 import datetime
 import random
+import socket
 import requests
 from flask import Flask, jsonify
 from flask_cors import CORS
@@ -174,8 +175,8 @@ def build_daily_puzzle():
 def get_puzzle():
     today = datetime.date.today()
     
-    # 1. Check if today's puzzle is already in the database
-    puzzle = DailyPuzzle.query.get(today)
+    # FIX 1: Use the modern SQLAlchemy syntax to clear the Legacy Warning
+    puzzle = db.session.get(DailyPuzzle, today)
     
     # 2. If not, generate the puzzle, save it, and then serve it
     if not puzzle:
@@ -185,9 +186,18 @@ def get_puzzle():
         if new_puzzle_data:
             new_puzzle = DailyPuzzle(puzzle_date=today, puzzle_data=new_puzzle_data)
             db.session.add(new_puzzle)
-            db.session.commit()
-            print("Puzzle successfully saved to the database!")
-            puzzle = new_puzzle
+            
+            # FIX 2: Catch the Race Condition
+            try:
+                db.session.commit()
+                print("Puzzle successfully saved to the database!")
+                puzzle = new_puzzle
+            except Exception as e:
+                # If a simultaneous request already saved today's puzzle, 
+                # cancel this save and just fetch the existing one.
+                db.session.rollback()
+                print("Puzzle was already created by a simultaneous request. Fetching existing...")
+                puzzle = db.session.get(DailyPuzzle, today)
         else:
             return jsonify({"error": "Failed to generate puzzle"}), 500
             
@@ -198,6 +208,25 @@ if __name__ == '__main__':
     # Ensure the database tables are created before starting the app
     with app.app_context():
         db.create_all()
-        
-    port = int(os.environ.get('PORT', 5000))
+
+    selected_port_from_env = os.environ.get('APP_SELECTED_PORT')
+
+    if selected_port_from_env:
+        port = int(selected_port_from_env)
+    else:
+        requested_port = int(os.environ.get('PORT', 5000))
+        port = requested_port
+
+        for candidate_port in range(requested_port, requested_port + 20):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                port_in_use = sock.connect_ex(('127.0.0.1', candidate_port)) == 0
+            if not port_in_use:
+                port = candidate_port
+                break
+
+        if port != requested_port:
+            print(f"Port {requested_port} is in use. Falling back to port {port}...")
+
+        os.environ['APP_SELECTED_PORT'] = str(port)
+
     app.run(host='0.0.0.0', port=port, debug=True)
