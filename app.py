@@ -33,7 +33,15 @@ app = Flask(__name__)
 CORS(app)
 
 # Database Configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///local_puzzles.db')
+# 1. Fetch the raw URL from the environment
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///local_puzzles.db')
+
+# 2. Apply the SQLAlchemy 1.4+ fix for Render's postgres:// prefix
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# 3. Pass the cleaned URL to SQLAlchemy
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
