@@ -67,21 +67,32 @@ def generate_categories_with_openai():
         "Authorization": f"Bearer {api_key}"
     }
     
-    # The strict system prompt guarantees we get the exact JSON structure we need
-    system_prompt = """
+    # Grab today's date to use as a randomizer seed
+    today_str = datetime.date.today().strftime("%B %d, %Y")
+    
+    # The f-string allows us to inject the date. 
+    # Notice the double {{ }} for the JSON structure!
+    system_prompt = f"""
     You are a clever puzzle designer for a daily YouTube-themed connections game. 
-    Generate 4 distinct, engaging categories related to YouTube video genres. 
+    Today's date is {today_str}.
+    
+    Generate 4 distinct, fun, and accessible categories related to popular YouTube video genres. 
+    The categories must be easy enough for a casual player to guess, but you MUST vary the categories you choose every single day. Do not default to the exact same top genres.
+    
+    To ensure variety, randomly select 4 distinct concepts from a wide pool of everyday interests. 
+    Examples include, but are not limited to: amusement park vlogs, baking competition highlights, movie cast interviews, pop concert footage, DIY room decor, morning routines, cute animal shorts, or sourdough bread tutorials.
+    
     For each category, provide exactly 4 highly specific YouTube search queries that will reliably return a relevant video.
     
     Format your response strictly as JSON matching this structure:
-    {
+    {{
       "categories": [
-        {
+        {{
           "category_name": "Example Category",
           "search_queries": ["query 1", "query 2", "query 3", "query 4"]
-        }
+        }}
       ]
-    }
+    }}
     """
     
     payload = {
@@ -91,14 +102,13 @@ def generate_categories_with_openai():
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": "Generate today's YouTube connections puzzle."}
         ],
-        "temperature": 0.7
+        "temperature": 0.8 # Bumped slightly from 0.7 to encourage more variety
     }
     
     response = requests.post(url, headers=headers, json=payload)
     
     if response.status_code == 200:
         content_string = response.json()["choices"][0]["message"]["content"]
-        # Convert the JSON string returned by OpenAI into a Python dictionary
         return json.loads(content_string)
     else:
         print(f"OpenAI Error: {response.status_code} - {response.text}")
