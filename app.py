@@ -52,6 +52,9 @@ class DailyPuzzle(db.Model):
     puzzle_date = db.Column(db.Date, primary_key=True)
     puzzle_data = db.Column(db.JSON, nullable=False)
 
+with app.app_context():
+        db.create_all()
+
 # --- API PIPELINE FUNCTIONS ---
 def generate_categories_with_openai():
     """Calls the OpenAI API to generate the 4 categories and 16 search queries."""
@@ -205,10 +208,6 @@ def get_puzzle():
     return jsonify(puzzle.puzzle_data)
 
 if __name__ == '__main__':
-    # Ensure the database tables are created before starting the app
-    with app.app_context():
-        db.create_all()
-
     selected_port_from_env = os.environ.get('APP_SELECTED_PORT')
 
     if selected_port_from_env:
