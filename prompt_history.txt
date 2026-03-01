@@ -1,0 +1,213 @@
+For AI models, I used both Gemini and GitHub Copilot (model Claude Opus 4.6)
+
+Gemini:
+
+I think this sounds great! Because I am assuming that it can really hard to somtimes get a sense of what a video is just based on the thumbnail, could there a be a hint feature where you can right click on a thumbnail to get the video description?
+
+Oooo I love the card flip idea! I will have to make my own substantial contribution to the code, but after talking to my professor, it seems the best strategy is using AI to get an initial implementation of the backend and frontend, and then I can make refinements later. I would like the frontend to connect to a python service on render.com that uses an LLM API. I have used the OpenAI API before so maybe I do that again (would I need to get a new api key?). Can you show me what the python code would look like, along with a simple html file that implements the frontend?
+
+I was told to use the requests module instead of the openai module
+
+That would be great! If you could also show me the full python and html files, that would be super helpful just so I can see how all the code is working together in one place
+
+Yeah how does the YouTube Data API work. Do I need an API key like for the OpenAI API? I am planning on creating a secrets.txt file where I will store api keys so I can run and test locally and I will put that file into gitignore
+
+Yes, if you could give me the full python file combining all of the logic for the OpenAI API getting the prompt and generating the categories, the YouTube Data API getting the thumbnails and video descriptions, and storing all of this into a database so there is only one puzzle per day that would be great
+
+Yes, I am thinking that I want to keep them separate because I want to deploy my frontend to github pages. I have only created by repo for the backend. Would you be able to help me create my repo for the frontend so it can deploy to github pages? Is there extra steps I have to follow? I created my personal website using github pages, but them seems to use a special url that is recognized
+
+I am currently getting my api key for the youtube data api and it is recommending that I restrict the key before using it in production. Should I do this?
+
+Github copilot gave me this warning:
+
+Render PostgreSQL gotcha — If you deploy on Render with a PostgreSQL database, Render provides a DATABASE_URL starting with postgres://, but SQLAlchemy requires postgresql://. You'd need to add a fixup like this before configuring the app:
+
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///local_puzzles.db')
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+
+Should I do this?
+
+I am getting this error in my terminal:
+
+python app.py
+ * Serving Flask app 'app'
+ * Debug mode: on
+Address already in use
+Port 5000 is in use by another program. Either identify and stop that program, or start the server with a different port.
+On macOS, try searching for and disabling 'AirPlay Receiver' in System Settings.
+
+Ok it looks like progress is being made, but there is still an issue. I am getting this in the terminal:
+
+/Users/saralaman/Documents/GitHub/15113-project2-backend/app.py:179: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  puzzle = DailyPuzzle.query.get(today)
+No puzzle found in database for 2026-02-28. Generating new one...
+1. Calling OpenAI to generate puzzle categories...
+No puzzle found in database for 2026-02-28. Generating new one...
+1. Calling OpenAI to generate puzzle categories...
+2. Calling YouTube API to fetch thumbnails for all 16 queries...
+2. Calling YouTube API to fetch thumbnails for all 16 queries...
+3. Shuffling the puzzle pieces...
+Puzzle successfully saved to the database!
+127.0.0.1 - - [28/Feb/2026 05:05:19] "GET /api/puzzle HTTP/1.1" 200 -
+3. Shuffling the puzzle pieces...
+127.0.0.1 - - [28/Feb/2026 05:05:24] "GET /api/puzzle HTTP/1.1" 500 -
+Traceback (most recent call last):
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlite3.IntegrityError: UNIQUE constraint failed: daily_puzzles.puzzle_date
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask/app.py", line 1536, in __call__
+    return self.wsgi_app(environ, start_response)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask/app.py", line 1514, in wsgi_app
+    response = self.handle_exception(e)
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask/app.py", line 1511, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask/app.py", line 919, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask_cors/extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask/app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/flask/app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/app.py", line 189, in get_puzzle
+    db.session.commit()
+    ~~~~~~~~~~~~~~~~~^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/scoping.py", line 597, in commit
+    return self._proxied.commit()
+           ~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 2030, in commit
+    trans.commit(_to_root=True)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "<string>", line 2, in commit
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 1311, in commit
+    self._prepare_impl()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "<string>", line 2, in _prepare_impl
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/state_changes.py", line 137, in _go
+    ret_value = fn(self, *arg, **kw)
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 1286, in _prepare_impl
+    self.session.flush()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4331, in flush
+    self._flush(objects)
+    ~~~~~~~~~~~^^^^^^^^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4466, in _flush
+    with util.safe_reraise():
+         ~~~~~~~~~~~~~~~~~^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/util/langhelpers.py", line 121, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/session.py", line 4427, in _flush
+    flush_context.execute()
+    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py", line 466, in execute
+    rec.execute(self)
+    ~~~~~~~~~~~^^^^^^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/unitofwork.py", line 642, in execute
+    util.preloaded.orm_persistence.save_obj(
+    ^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py", line 93, in save_obj
+    _emit_insert_statements(
+    ^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/orm/persistence.py", line 1048, in _emit_insert_statements
+    result = connection.execute(
+    
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+    
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/sql/elements.py", line 527, in _execute_on_connection
+    return connection._execute_clauseelement(
+    
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+    
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+    
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 2363, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ^
+  File "/Users/saralaman/Documents/GitHub/15113-project2-backend/venv/lib/python3.13/site-packages/sqlalchemy/engine/default.py", line 952, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: daily_puzzles.puzzle_date
+[SQL: INSERT INTO daily_puzzles (puzzle_date, puzzle_data) VALUES (?, ?)]
+[parameters: ('2026-02-28', '{"thumbnails": [{"id": 10, "url": "https://i.ytimg.com/vi/Vy1qXNQxGAA/hqdefault.jpg", "title": "Here&#39;s What Gaming Laptop I&#39;d Buy at Every Pr ... (4758 characters truncated) ...  1 of the 18 day Get Abs Challenge! Follow along the full schedule on my website and see how you go with this ...", "category": "Fitness Workouts"}]}')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+127.0.0.1 - - [28/Feb/2026 05:05:24] "GET /api/puzzle?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+127.0.0.1 - - [28/Feb/2026 05:05:24] "GET /api/puzzle?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+127.0.0.1 - - [28/Feb/2026 05:05:24] "GET /api/puzzle?__debugger__=yes&cmd=resource&f=console.png&s=oDIE6aJCFaQluOoDxfJh HTTP/1.1" 200 -
+127.0.0.1 - - [28/Feb/2026 05:05:24] "GET /api/puzzle?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+
+And in my browser is displays this:
+sqlalchemy.exc.IntegrityError
+sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) UNIQUE constraint failed: daily_puzzles.puzzle_date
+[SQL: INSERT INTO daily_puzzles (puzzle_date, puzzle_data) VALUES (?, ?)]
+[parameters: ('2026-02-28', '{"thumbnails": [{"id": 10, "url": "https://i.ytimg.com/vi/Vy1qXNQxGAA/hqdefault.jpg", "title": "Here&#39;s What Gaming Laptop I&#39;d Buy at Every Pr ... (4758 characters truncated) ...  1 of the 18 day Get Abs Challenge! Follow along the full schedule on my website and see how you go with this ...", "category": "Fitness Workouts"}]}')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+
+Along with a lot of traceback
+
+Yes I have a separate repo for frontend code. Will i need an index.html file and a javascript and css file? That would be great if you could provide that code!
+
+Ok I put this in
+https://one5113-project2.onrender.com/api/puzzle
+
+But I got this:
+Internal Server Error
+The server encountered an internal error and was unable to complete your request. Either the server is overloaded or there is an error in the application.
+
+What does this mean?
+
+This is the error I see in red in the logs:
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+Honestly I feel like the more basic categories are ok because I don't want the game to become too hard, I juts really don't want them to be the same everyday. How can I adjust the prompt accordingly?
+
+
+GitHub Copilot:
+
+I have some backend code here (app.py) and it looks like I might need to install some packages because I also need to create a requirements.txt file. Could you help me with this, and also check that my app.py file looks correct?
+
+Would you be able to help me with the package installations? Should I create a virtual environment? Also I do have a gitignore, but I have not yet added secrets.txt to it
+
+My requirements.txt is saying that the packages are not installed in the selected environment. What does this mean? Do I need specific version numbers as well?
+
+
+GitHub Copilot (Frontend):
+
+Hi there! I am making a connections games inspired by the New York Times connections game but with a twist: instead of having the user organize words into groups of 4, the user has to organize youtube videos into groups of 4 based on thumbnails. I am really excited bout this projects and so far, all of the logic is working. I just want to refine the ui a bit to take it to the next level. Is there a way that we could animate the thumbnails so that when a user selects all four they move together to form one row? I also just want to enhance the ui in general.
+
+This is great!! I love it! Two things I noticed is that the yellow color unfortunately did not show up. Also, would it be possible for the category name to be displayed above the thumbnail images, like the original game?
+
+For my revealAll function, I want the cards to animate and move to rows with their respective categories. Is this possible to do?
+
+I'm wondering how hard this would be to implement. I'm thinking right now that the game might be a bit easy. I'm thinking that I want the user to select four video thumbnails, and then guess the name of the category that they think connects them. Could there be text input that allows the user to guess the category name? Of course, there would have to be some pattern matching with this (ex. if the user guesses "Cooking" that should count for "Cooking Tutorials" or "Tech" should count for "Tech Reviews")
+
+
+My own contribution:
+
+I decided to implement a hint feature that users can toggle on and off to reveal the video titles in addition to the thumbnail images. Specifically, I wrote the function toggleHintMode and made some modifications to the style.css file that I got from AI to handle the styling for this additional feature. Moreover, AI gave me three game states (success, error, and win) and I decided to modify the code to add a fourth game state called "close" that occurs when the user has identified three of the four videos in a category. I wanted to add this game state because The New York Times version lets the user know if they are one away from identifying a category.
+
